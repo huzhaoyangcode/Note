@@ -2,12 +2,47 @@ CMake 学习笔记
 
 一：写在前面的话
 1.1 为什么要学cmake?
+大型C/C++项目都是由cmake来做构建管理器，了解cmake,对了解整个项目的框架很有帮助，而框架对了解一个大型程序的重要
+性不言而喻。
 1.2 达到什么样的学习目标？
+理解cmake的工作机制，能读懂大型程序的CMakeLists.txt，会写CMakeLists.txt,学习到最后要读懂mediapipe的CMakeList.txt
+还有C++的标准库的CMakeLists.txt
 1.3 怎样学？
+以经典书籍，Mastering+CMake为参考，边读边做笔记边对着项目看。
+看完整本书籍之后，用自己的语言组织起来写专题博客。
 1.4 学习计划
+每一个星期至少学6个番茄闹钟的时间的CMake.
 1.5 学习打卡
+2019/5/26 
 
 二：笔记开始
-日期：
+日期：2019/5/26
+cmake 是一个用C++编写的跨平台的构建管理器（build manager），通过解析用户编写的CMakeLists.txt生成不同平台所需要的构建文件
+如linux平台的Makefile.其比老一代的autoconf有很多优势。
+2.3 cmake的基础用法和语法
+cmake控制的构建过程是由编写CMakeLists.txt文件而完成的，每一个相关的文件夹下都需要有一个CMakeLists.txt文件，
+这些文件由cmake的一些简单命令组成，命令的形式是command(args...), command是命令的名字，args是由空白字符分割开
+的参数列表。版本2.2及以后的cmake命令名可以用大写也可以用小写.
+cmake 支持简单的变量，可以包含字符串或字符串列表，引用变量使用${VAR}的形式。
+cmake 可以直接访问系统的环境变量，语法为：$ENV{VAR} 例如：$ENV{HOME}
+2.4 helloword sample
+简单版本：
+project(Hello)
+add_executable(hello hello.c)
+解释：project 注册一个项目名，add_executable表示用什么源文件生成目标文件，以及生成的目标文件的名字，
+项目名和目标名是没有关系的，可以写成不一样的值。
+
+复杂版本：
+cmake_minimum_requied(2.6)
+project(Hello)
+
+
+
+
+
+
+
+
+
 
 
