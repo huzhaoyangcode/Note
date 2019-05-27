@@ -16,7 +16,7 @@ CMake 学习笔记
 2019/5/26 
 
 二：笔记开始
-日期：2019/5/26
+日期：2019/5/26（2）
 cmake 是一个用C++编写的跨平台的构建管理器（build manager），通过解析用户编写的CMakeLists.txt生成不同平台所需要的构建文件
 如linux平台的Makefile.其比老一代的autoconf有很多优势。
 2.3 cmake的基础用法和语法
@@ -32,10 +32,37 @@ add_executable(hello hello.c)
 解释：project 注册一个项目名，add_executable表示用什么源文件生成目标文件，以及生成的目标文件的名字，
 项目名和目标名是没有关系的，可以写成不一样的值。
 
+日期：2019/5/27
 复杂版本：
 cmake_minimum_requied(2.6)
 project(Hello)
 
+set(HELLO_SRC hello.c file2.c file3.c)
+if(WIN32)
+	set(HELLO_SRC ${HELLO_SRC} WinSupport.c)
+else
+	set(HELLO_SRC ${HELLO_SRC} UnixSupport.c)
+endif()
+
+add_executable(hello ${HELLO_SRC})
+
+#look for the tcl library
+find_library (TCL_LIBRARY 
+NAMES tcl tcl84 tcl83
+PATHS /usr/lib /usr/local/lib
+)
+
+if(TCL_LIBRARY)
+	target_link_library(hello ${TCL_LIBRARY})
+endif()
+
+解释:set 可以用来设置变量，这里设置了一个string列表，后面又根据不同平台追加了不同的支持文件。
+#开头的是注释，将被cmake忽略。find_library命令查找库，给了查找的名字，以及查找的路径。
+
+2.5 运行cmake
+cmake既支持内部编译也支持外部编译;
+内部编译就是在源文件夹下进行编译，这样编译产生的文件就会在源文件夹下，比较乱，有删除源文件的风险。
+外部编译就是专门建立一个文件夹，然后在这个文件夹下进行编译。
 
 
 
