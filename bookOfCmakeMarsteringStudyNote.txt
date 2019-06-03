@@ -89,12 +89,76 @@ cmake运行机制：
 cmake执行的时候会先生成一个cmake类对象实例,这个实例会管理整个配置过程,以及盛放所有的构建信息,如缓存值等. cmake做的第一件事是根据用户的选择来创建一个全局生成器,是Unix的
 Makefile，还是visual studio 10.然后cmake 会把控制权交给这个全局生成器.
 全局生成器负责项目的配置和Makefile的生成,在生成Unix的Makefile的过程中,全局生成器会为每一个源文件中的参加编译的子文件夹生成一个本地生成器,本地生成器会生成本文件夹下的Makefile
-全局生成器只负责协调这些由本地生成器生成的Makefile,
+全局生成器只负责协调这些由本地生成器生成的Makefile,然后生成最顶层的Makefile.
+每个本地生成器都包含一个cmMakefile类实例,这个实例就像是一个结构体一样,用父文件夹的一些参数进行初始化，然后在解析本文件夹下的CMakeList.txt文件时进行填充。
+解析CMakeList.txt的命令是根据命令在本文件中出现的次序而逐步解析。
+每个命令都是一个单独的类，这个类包含两部分，第一是初始化传递方法，第二就是终止传递方法，说白了就是构造和析构函数。构造函数接受参数和本文件夹下的CmMakefile的实例，
+然后调用cmMakefile类的方法来处理参数，然后把结果记录到cmMakefile实例中.第二个方法要整个项目所有的命令都执行完毕才会被执行，一般的命令都没有这个方法。
+当所有的CMakeLists文件被处理，生成器就会根据存储在cmMakefile中的信息生成目标文件，如makefile.
+
+总结：cmake 就是一个程序,它会解析CMakeList.txt然后生成Makefile.经过我的测试发现,cmake解析顺序是根据最顶层的CMakeList.txt中出现的语句顺序进行的,
+解析的数据会存储起来,当所有的数据都解析完毕之后,将会配置和生成Makefile.
+
+日期：2019/05/30
 3.2 目标文件
+目标文件代表可执行的文件,库等.每调用一个add_library和add_executable就会产生一个目标文件.例如：
+add_library(foo STATIC foo.c foo2.c) 用来产生一个静态库, foo就是静态库的名字,该指令会在需要的时候扩展库名,所以没必要写全,在此会扩展为libfoo.la, 使用此命令后,
+添加的目标文件名，在整个cmake 项目中都是可以使用的，是全局的。
+库的类型有STATIC SHARED MODULE, 表示静态库, 动态库, 模块. 其中在linux系统下模块和动态库效果是一样的.若未指定类型默认构建静态库.
+设置目标文件的属性使用set_target_properties 和 get_target_properties.或者是set_property 和 get_property 常设置的属性就是目标文件的LINK_FLAGS,这个属性用来指定链接标志.
+为目标文件添加依赖库的命令是target_link_libraries,可以添加静态或动态链接库.
+
+日期：2019/06/3
 3.3 源文件
+源文件一般会记录文件名和扩展以及属性,属性可以用set_source_files_properties 和 get_source_file_property命令设置或获取,常用的的属性有：
+COMPILE_FLAGS : 为文件增加编译属性或查看文件的编译属性
+GENERATED	：标明这个文件是编译的时候产生的,所以可能第一次运行CMake的时候不存在该文件
+OBJECT_DEPENDS ：增加可选的依赖文件。
+LAGUAGE: 文件的编写语言,例如CXX
+
 3.4 目录,生成器,测试,属性
+属性是一组键值对,是C++类的特点,这些类包括目标文件,源文件,目录,生成器等.设置这些属性除了专用的set_target_properties和set_source_files_properties等接口,
+还有通用的set_property和get_property属性,一些常用的目录的属性有：
+ADDITIONAL_MAKE_CLEAN_FILES	:设置当前目录下在执行make clean的时候clean这些文件.
+EXCLUDE_FROM_ALL :如果指定了该属性，被指定的目录中的目标文件就不会自动生成。
+
 3.5 变量和缓存
+cmake的变量是用set来定义的,使用的时候${VAR}, if的时候用VAR, 作用域是当前cmakelist.txt文件,按定义的顺序决定,函数中不用PARENT_SCOPE的时候是不会修改变量值的。
+set(test 2 PARENT_SCOPE) 修改test的值,修改父范围的test。
+变量可以存储一个值，也可以存储一个列表。
+缓存是用来暂存一些用户的选择以方便下次运行cmake的时候，不需要用户重新键入或重新计算一些选项. 这些缓存的值一般会存储到构建文件夹的CMakeCache.txt中.所以在构建的时候
+如果重新设置了option或者修改了一些环境则需要删除这个文件，然后再运行cmake进行配置。
+在cache中建立变量的方法有option 或 set.
+option用来建立一个Boolean类型的选项。用法如下：
+option(<option_variable> "help string describing option" [initial value])
+不指定初始化值默认为OFF
+cache 中变量的类型有BOOL PATH(有界面的) FILEPATH(有界面的) STRING;option 用来专门指定bool类型的值,而set可以申请所有类型，用法如下：
+set(<variable> <value> [[CACHE <type> <docstring> [FORCE]] | PARENT_SCOPE])
+
 3.6 构建配置
+cmake支持的构建类型有Build Release MinSizeRel RelWithDebInfo;
+命令行指定配置-DCMAKE_BUILD_TYPE
+
+4.1 cmake语法
+cmake是的运行是由CMakeList.txt来控制的, 在写CMakeList.txt的过程中有如下语法：
+1:#开头的语句将被忽略,被视为注释
+2:命令是由命令名和括号以及括号里面用空白字符分开的参数组成的
+3:一对引号之间的内容被视为一个参数。
+4:可以用反斜杠用来转义
+5:对大小写不敏感
+
+4.2 基础命令
+project(projectName [CXX] [C] [Java] [NONE])
+设置项目名和语言,不指定语言的情况下默认支持C与C++
+
+
+
+
+
+
+
+
+
 
 
 
