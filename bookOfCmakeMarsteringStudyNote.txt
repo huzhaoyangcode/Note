@@ -151,9 +151,99 @@ cmake是的运行是由CMakeList.txt来控制的, 在写CMakeList.txt的过程�
 project(projectName [CXX] [C] [Java] [NONE])
 设置项目名和语言,不指定语言的情况下默认支持C与C++
 
+add_subdirectory(source_dir [binary_dir][EXCLUDE_FROM_ALL])
+添加需要编译的子文件夹,binary_dir 会指定该文件夹的编译结果放在哪里,如果不指定会放在编译文件夹下的一个与source_dir同名的dir里面, EXCLUDE_FROM_ALL 指定这个的时候
+将不随make一起编译，可以手动编译，即make targetname
+souce_dir 是要添加的待编译的文件夹，一般为相对路径。
 
+set(<variable> <value> [[CACHE <type> <docstring> [FORCE]] | PARENT_SCOPE])
+申请或修改变量和cache的值.
+设置普通变量直接用set(<variable> <value>)即可,若想设置父范围的变量则需要加PARENT_SCOPE
+设置cache则需要指定类型，和说明，以及要不要加FORCE选项
 
+add_executable(<name> [WIN32] [MACOSX_BUNDLE] [EXCLUDE_FROM_ALL] source1 [source2 ...])
+指定由源文件生成目标文件。
 
+add_library(<name> [STATIC | SHARED | MODULE] [EXCLUDE_FROM_ALL] source1 [source2 ...])
+指定由源文件生成指定类型的库,不指定类型，默认生成静态库。
+
+4.3 控制流
+4.3.1 判断
+A:简单判断语句，else 与endif的括号是空的，并且一个if对应一个endif 
+if(varible)
+else()
+endif()
+
+B:支持elseif()
+if(v1)
+elseif(v2)
+elseif(v3)
+else()
+endif()
+
+C：支持逻辑判断
+if(variable)
+variable 非空 0 FALSE OFF 或NOTFOUND 时, 执行body
+
+if(NOT variable)
+variable 是空 0 FALSE OFF 或NOTFOUND 时, 执行body
+
+if(variable AND variable2)
+两变量同时为真方可执行body
+
+if(variable OR variable2)
+两变量有一者为真,则可执行body
+
+if(COMMAND command-name)
+如果command-name是一个可以调用的命令则执行body
+
+if(DEFINED variable)
+如果定义了variable 则执行body
+
+if(EXISTS file-name)
+if(EXISTS directory-name)
+提供的名字是以文件或文件夹方式存在则执行body
+
+if(IS_DIRECTORY name)
+提供的名字是目录 则执行body
+
+if(IS_ABSOLUTE name)
+提供的名字是绝对路径 则执行body
+
+if(name1 IS_NEWER_THAN name2)
+name1文件比name2文件新 则执行body
+
+if(variable MATCHES regex)
+if(string MATCHES regex)
+提供的变量或字符串符合提供的正则表达式则执行body
+
+数值比较关键字：EQUAL LESS GREATER
+字符串比较关键字：STRLESS STREQUAL STRGREATER
+版本比较关键字：VERSION_LESS VERSION_EQUAL VERSION_GREATER 
+版本号规则：major[.minor[.patch[.tweak]]]
+
+4.3.2 循环
+foreach(loopVariableName listBeLooped)
+....
+endforeach()
+用loopVariableName变量在每一次循环中代替listBeLooped中的一个值进入循环，执行一些语句。
+foreach可以嵌套，书中提到，可以用${${loopVariableName}_test} 来构造变量名用。
+
+while(testStatmentLikeIf)
+endwhile()
+while语句是基于一个类似if语句用到的测试语句进行的,如LESS 等。
+
+4.3.3 宏和函数
+function(functionName paramers....)
+endfunction()
+定义函数要用关键字function开始，第一个参数是函数名，其他的都是函数传递的形式参数。
+函数传递的是参数在函数内部是一个新的参数，和函数外部的参数没有关系，除非要用PARENT_SCOPE不能改变父范围的值。
+
+macro (macroName paramers...)
+endmacro()
+和函数的使用是一样的，但是其传入的参数不被看作是变量，而是简单的字符串替换。
+
+4.4 正则表达式
 
 
 
