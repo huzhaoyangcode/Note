@@ -244,6 +244,30 @@ endmacro()
 和函数的使用是一样的，但是其传入的参数不被看作是变量，而是简单的字符串替换。
 
 4.4 正则表达式
+略，用到再查吧
+
+4.5 检查cmake版本
+用例：
+if(${CMAKE_VERSION} VERSION_GREATER 1.6.1)
+endif()
+用判断语句进行版本的判断
+
+cmake_minimum_required(VERSION 2.2)
+要求最小版本号，一般在最顶层的CMakeList.txt的开头就限制。
+
+4.6 使用模块
+模块就是cmake用来代码重复利用的一个方式，模块中就是一些cmake命令的堆积，用来完成一个独立的功能。
+cmake 使用模块用include命令，include(<file|module> [OPTIONAL] [RESULT_VARIABLE <VAR>] [NO_POLICY_SCOPE])
+该命令会从文件或模块中加载并运行cmake命令。
+
+include加载模块可以使用全路径，也可以让cmake自己去找，其查找的根据就是CMAKE_MODULE_PATH变量的值。如果找不到就会到子文件夹下找，换而言之就是递归查找。
+
+
+
+4.7 政策
+
+4.8 链接库
+
 
 
 
